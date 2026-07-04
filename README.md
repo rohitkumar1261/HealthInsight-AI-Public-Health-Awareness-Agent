@@ -1,6 +1,6 @@
 # HealthGuard - Public Health Awareness Agent System
 
-HealthGuard is a trusted public health assistant built using **Google's Agent Development Kit (ADK)**. It simplifies medical terminology, identifies and debunks health myths, provides vaccination schedules, and suggests healthy habits.
+HealthGuard is a trusted public health assistant. It simplifies medical terminology, identifies and debunks health myths, provides vaccination schedules, and suggests healthy habits.
 
 HealthGuard is designed with **privacy-first security layers**, including input validation and automated PII masking, and features a clean, responsive single-page web application.
 
