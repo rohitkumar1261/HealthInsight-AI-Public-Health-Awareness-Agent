@@ -1,0 +1,15 @@
+# Render Deployment Blueprint for HealthInsight AI
+# To deploy, go to your Render Dashboard, click 'New' -> 'Blueprint', and select your repository.
+services:
+  - type: web
+    name: healthinsight-ai
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: health-agent/Dockerfile
+    dockerContext: health-agent
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # Must be set manually in the Render dashboard
+      - key: PORT
+        value: 8080
