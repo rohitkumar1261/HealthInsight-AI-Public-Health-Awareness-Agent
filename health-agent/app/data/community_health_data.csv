@@ -1,0 +1,43 @@
+date,region,disease,cases,vaccination_rate
+2026-01-15,Ward 1,Dengue,12,0.78
+2026-01-15,Ward 2,Influenza,25,0.85
+2026-01-15,Ward 3,Diabetes,10,0.45
+2026-01-15,Ward 4,Heat Stroke,1,0.90
+2026-02-15,Ward 1,Dengue,15,0.78
+2026-02-15,Ward 2,Influenza,28,0.85
+2026-02-15,Ward 3,Diabetes,11,0.46
+2026-02-15,Ward 4,Heat Stroke,0,0.90
+2026-03-15,Ward 1,Dengue,14,0.79
+2026-03-15,Ward 2,Influenza,30,0.86
+2026-03-15,Ward 3,Diabetes,10,0.47
+2026-03-15,Ward 4,Heat Stroke,2,0.90
+2026-04-15,Ward 1,Dengue,18,0.80
+2026-04-15,Ward 2,Influenza,22,0.87
+2026-04-15,Ward 3,Diabetes,12,0.47
+2026-04-15,Ward 4,Heat Stroke,4,0.91
+2026-05-15,Ward 1,Dengue,25,0.81
+2026-05-15,Ward 2,Influenza,24,0.88
+2026-05-15,Ward 3,Diabetes,10,0.48
+2026-05-15,Ward 4,Heat Stroke,8,0.91
+2026-06-15,Ward 1,Dengue,35,0.82
+2026-06-15,Ward 2,Influenza,26,0.89
+2026-06-15,Ward 3,Diabetes,11,0.48
+2026-06-15,Ward 4,Heat Stroke,15,0.92
+2026-01-15,Ward 1,Influenza,15,0.80
+2026-02-15,Ward 1,Influenza,18,0.80
+2026-03-15,Ward 1,Influenza,16,0.81
+2026-04-15,Ward 1,Influenza,17,0.81
+2026-05-15,Ward 1,Influenza,15,0.82
+2026-06-15,Ward 1,Influenza,16,0.82
+2026-01-15,Ward 2,Dengue,5,0.85
+2026-02-15,Ward 2,Dengue,6,0.85
+2026-03-15,Ward 2,Dengue,4,0.86
+2026-04-15,Ward 2,Dengue,5,0.86
+2026-05-15,Ward 2,Dengue,7,0.87
+2026-06-15,Ward 2,Dengue,8,0.87
+2026-01-15,Ward 3,Dengue,8,0.70
+2026-02-15,Ward 3,Dengue,9,0.70
+2026-03-15,Ward 3,Dengue,7,0.71
+2026-04-15,Ward 3,Dengue,8,0.71
+2026-05-15,Ward 3,Dengue,9,0.72
+2026-06-15,Ward 3,Dengue,10,0.72

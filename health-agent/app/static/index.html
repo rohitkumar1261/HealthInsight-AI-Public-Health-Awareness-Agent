@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthGuard - Public Health AI</title>
+    <title>HealthInsight AI – Public Health Awareness Agent</title>
     <!-- Google Fonts for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js for Decision Intelligence trends -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -19,7 +21,7 @@
                 <div class="logo-area">
                     <span class="logo-icon">🛡️</span>
                     <div>
-                        <h2>HealthGuard AI</h2>
+                        <h2>HealthInsight AI</h2>
                         <span class="logo-sub">Google ADK Public Health Assistant</span>
                     </div>
                 </div>
@@ -41,6 +43,10 @@
                     <div class="pipeline-node" id="node-preventive_care_agent">
                         <span class="dot"></span> Preventive Care
                     </div>
+                    <span class="arrow">→</span>
+                    <div class="pipeline-node" id="node-community_health_analytics_agent">
+                        <span class="dot"></span> Analytics
+                    </div>
                 </div>
 
                 <div class="header-actions">
@@ -57,7 +63,7 @@
                     <div class="chat-history" id="chat-history">
                         <div class="chat-message system">
                             <div class="message-content">
-                                <p>Welcome to HealthGuard. Ask questions about diseases, symptoms, health myths, vaccine schedules, or preventive care.</p>
+                                <p>Welcome to HealthInsight AI. Ask questions about diseases, symptoms, health myths, vaccine schedules, or preventive care.</p>
                             </div>
                         </div>
                     </div>
@@ -69,7 +75,8 @@
                         <button class="query-chip" onclick="setQuery('Is it true that antibiotics cure viral infections?')">Antibiotics myth</button>
                         <button class="query-chip" onclick="setQuery('How can I prevent heat stroke?')">Prevent heat stroke</button>
                         <button class="query-chip" onclick="setQuery('What vaccinations are recommended for children?')">Child vaccines</button>
-                        <button class="query-chip" onclick="setQuery('My email is test@mail.com. Explain diabetes.')">Diabetes & PII Test</button>
+                        <button class="query-chip" onclick="setQuery('Analyze community health data trends')">Health analytics</button>
+                        <button class="query-chip" onclick="setQuery('Predict Dengue risk in Ward 1')">Predict Ward 1 Risk</button>
                     </div>
 
                     <form class="chat-input-area" id="chat-form">
@@ -80,6 +87,49 @@
                     <footer class="disclaimer-footer">
                         Disclaimer: This system provides educational information only and does not replace professional medical advice. Always consult a doctor for health concerns.
                     </footer>
+                </section>
+
+                <!-- Right: Analytics Panel -->
+                <section class="panel analytics-panel">
+                    <div class="panel-header">
+                        <span class="panel-icon">📊</span>
+                        <h3>Community Health Analytics</h3>
+                    </div>
+                    
+                    <div class="analytics-content">
+                        <!-- KPI Grid -->
+                        <div class="kpi-grid">
+                            <div class="kpi-card">
+                                <span class="kpi-label">Total Cases</span>
+                                <span class="kpi-value" id="kpi-total-cases">-</span>
+                            </div>
+                            <div class="kpi-card">
+                                <span class="kpi-label">Highest Risk Region</span>
+                                <span class="kpi-value" id="kpi-highest-region">-</span>
+                            </div>
+                            <div class="kpi-card">
+                                <span class="kpi-label">Avg Vaccination Rate</span>
+                                <span class="kpi-value" id="kpi-avg-vac">-</span>
+                            </div>
+                            <div class="kpi-card">
+                                <span class="kpi-label">Current Risk Level</span>
+                                <span class="kpi-value" id="kpi-risk-level">-</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Container -->
+                        <div class="chart-container">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                        
+                        <!-- Recommendations Section -->
+                        <div class="recs-section">
+                            <h4>Active Public Health Recommendations</h4>
+                            <ul id="recs-list">
+                                <li>Loading recommendations...</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
             </div>

@@ -62,6 +62,11 @@ mcp_toolset_preventive = McpToolset(
     tool_filter=["get_vaccination_schedule", "get_preventive_guidelines"]
 )
 
+mcp_toolset_analytics = McpToolset(
+    connection_params=mcp_connection,
+    tool_filter=["analyze_health_trends", "predict_health_risk", "generate_health_recommendations"]
+)
+
 # Common model definition
 model_instance = Gemini(
     model="gemini-flash-latest",
@@ -108,6 +113,21 @@ preventive_care_agent = Agent(
         "before answering."
     ),
     tools=[mcp_toolset_preventive]
+)
+
+# 3.5. Community Health Analytics Agent
+community_health_analytics_agent = Agent(
+    name="community_health_analytics_agent",
+    model=model_instance,
+    description="Analyzes community health datasets, detects disease trends, identifies high-risk regions, and generates health recommendations.",
+    instruction=(
+        "You are the Community Health Analytics Agent. Analyze community health data, "
+        "detect disease trends, identify high-risk regions, and generate recommendations. "
+        "Always use the analyze_health_trends, predict_health_risk, and generate_health_recommendations "
+        "tools to perform data-driven analysis and predictions before formulating your answer. "
+        "Support public health decision-making with clear statistics."
+    ),
+    tools=[mcp_toolset_analytics]
 )
 
 # Callback for input validation and sanitization before the coordinator runs
@@ -162,13 +182,14 @@ root_agent = Agent(
         "1. If the user asks about disease explanations, symptoms, causes, or diagnosis info, transfer control to health_info_agent.\n"
         "2. If the user asks to verify a myth, claim, or rumor, transfer control to myth_verification_agent.\n"
         "3. If the user asks about child or adult vaccinations, healthy habits, hygiene, or disease prevention, transfer control to preventive_care_agent.\n"
-        "4. If the query is general health awareness, address it briefly or ask for clarification.\n\n"
+        "4. If the user asks to analyze community health data, show disease trends, predict disease risk, identify highest risk regions, or generate public health recommendations based on statistics, transfer control to community_health_analytics_agent.\n"
+        "5. If the query is general health awareness, address it briefly or ask for clarification.\n\n"
         "Disclaimers:\n"
         "Once the sub-agent completes its execution and returns control, present the response clearly to the user. "
         "At the end of EVERY response, you MUST append the following text on a new line:\n"
         "'*Disclaimer: This information is for educational purposes only and does not replace professional medical advice. Always consult a qualified healthcare provider for medical concerns.*'"
     ),
-    sub_agents=[health_info_agent, myth_verification_agent, preventive_care_agent],
+    sub_agents=[health_info_agent, myth_verification_agent, preventive_care_agent, community_health_analytics_agent],
     before_agent_callback=coordinator_before_callback
 )
 

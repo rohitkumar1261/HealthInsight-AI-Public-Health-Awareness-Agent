@@ -45,9 +45,39 @@ def test_pii_masking_ssn():
 
 def test_agent_imports():
     """Verify that we can import the coordinator and subagents successfully."""
-    from app.agent import root_agent, health_info_agent, myth_verification_agent, preventive_care_agent
+    from app.agent import root_agent, health_info_agent, myth_verification_agent, preventive_care_agent, community_health_analytics_agent
     assert root_agent.name == "health_coordinator_agent"
-    assert len(root_agent.sub_agents) == 3
+    assert len(root_agent.sub_agents) == 4
     assert health_info_agent.name == "health_info_agent"
     assert myth_verification_agent.name == "myth_verification_agent"
     assert preventive_care_agent.name == "preventive_care_agent"
+    assert community_health_analytics_agent.name == "community_health_analytics_agent"
+
+def test_analytics_trends_tool():
+    """Verify that the analyze_health_trends tool returns valid data."""
+    from app.mcp_server import analyze_health_trends
+    result = analyze_health_trends()
+    assert "Total Cases" in result
+    assert "Highest Risk Region" in result
+    assert "Trends (Latest MoM)" in result
+
+def test_analytics_predict_tool():
+    """Verify that predict_health_risk correctly evaluates trends and risk level."""
+    from app.mcp_server import predict_health_risk
+    # Ward 1 Dengue cases: 25 -> 35 (40% MoM increase -> High Risk)
+    res_high = predict_health_risk("Dengue", "Ward 1")
+    assert "High Risk" in res_high
+    
+    # Ward 3 Dengue cases: 9 -> 10 (11% MoM increase -> Medium Risk)
+    res_med = predict_health_risk("Dengue", "Ward 3")
+    assert "Medium Risk" in res_med
+
+def test_analytics_recommendations_tool():
+    """Verify that generate_health_recommendations returns appropriate guidance."""
+    from app.mcp_server import generate_health_recommendations
+    res_dengue = generate_health_recommendations("Dengue", "High Risk")
+    assert "mosquito" in res_dengue.lower()
+    assert "Urgent" in res_dengue
+    
+    res_heat = generate_health_recommendations("Heat Stroke", "Low Risk")
+    assert "cooling" in res_heat.lower()

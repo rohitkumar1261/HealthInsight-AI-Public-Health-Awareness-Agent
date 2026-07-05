@@ -1,129 +1,133 @@
-# Implementation Plan: Public Health Awareness Agent
+# Implementation Plan: HealthInsight AI Decision Intelligence Extension
 
-This plan outlines the architecture and implementation details for building a **Public Health Awareness Agent** using Google's Agent Development Kit (ADK). The system will act as a trusted assistant, providing disease info, verifying health myths, and recommending preventive habits, supported by a custom MCP server and a modern visual web dashboard.
+This plan details the steps to enhance **HealthInsight AI** into a Public Health Decision Intelligence Platform. We will add a new specialized agent, a realistic CSV community health dataset, Pandas-based trend and risk prediction tools, an API endpoint, and a Chart.js dashboard extension—without breaking any of the existing Public Health Awareness functionalities.
 
 ---
 
 ## User Review Required
 
-Please review the following design decisions before we proceed:
+Please review the following design decisions:
 
-1. **Model Selection**: We will use `gemini-2.5-flash` (or the default recommended model from ADK) to power our LLM agents, ensuring fast responses and high tool-calling/delegation reliability.
-2. **Local MCP Server integration**: The MCP server will run as a subprocess (connected via Stdio) managed by the ADK `McpToolset`. This ensures zero complex configuration for the user.
-3. **Vanilla Frontend**: We will implement the frontend with HTML5, modern Vanilla CSS (using variables, glassmorphism, responsive grid, and custom keyframe animations), and ES6 JavaScript. This avoids npm build overhead while providing a premium, interactive, and responsive UI.
+1. **Dependency Addition**: We will add `pandas` to the dependencies in `pyproject.toml` to perform trend analysis and risk computations. We will install it using:
+   ```bash
+   uv add pandas
+   ```
+2. **Chart.js CDN**: We will import the lightweight Chart.js library from a trusted CDN (e.g., `https://cdn.jsdelivr.net/npm/chart.js`) in `app/static/index.html` to render line charts.
+3. **Dataset Location**: The CSV file will be created at [app/data/community_health_data.csv](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/data/community_health_data.csv) for easy packaging and accessibility by the MCP server.
 
 ---
 
 ## Proposed Architecture
 
-We will implement a multi-agent coordinator-delegator pattern:
+We will add a new agent, `community_health_analytics_agent`, and bind it to the new analytics tools:
 
 ```mermaid
 graph TD
-    User([User]) --> WebServer[FastAPI Web Server]
-    WebServer --> CoordinatorAgent[Coordinator Agent]
-    CoordinatorAgent --> InputValidation[before_agent_callback: Input Validation]
-    CoordinatorAgent --> PIIPlugin[PIIMaskingPlugin]
+    User([User/Web Dashboard]) -->|GET /api/chat| WebServer[FastAPI Web Server]
+    User -->|GET /api/analytics| WebServer
     
-    CoordinatorAgent --> HealthInfoAgent[Health Information Agent]
-    CoordinatorAgent --> MythVerificationAgent[Myth Verification Agent]
-    CoordinatorAgent --> PreventiveCareAgent[Preventive Care Agent]
+    WebServer -->|Runner.run_async| CoordinatorAgent[Health Coordinator Agent]
     
-    HealthInfoAgent --> MCPServer[MCP Server: Disease Info Tool]
-    MythVerificationAgent --> MCPServer[MCP Server: Myth Verification Tool]
-    PreventiveCareAgent --> MCPServer[MCP Server: Vaccine & Prevention Tools]
+    CoordinatorAgent -->|Transfer| HealthInfoAgent[Health Info Agent]
+    CoordinatorAgent -->|Transfer| MythVerificationAgent[Myth Verification Agent]
+    CoordinatorAgent -->|Transfer| PreventiveCareAgent[Preventive Care Agent]
+    CoordinatorAgent -->|Transfer| AnalyticsAgent[Community Health Analytics Agent]
+    
+    AnalyticsAgent -->|Tool Call| MCPServer[Local MCP Server]
+    
+    MCPServer -->|analyze_health_trends| CSV[(community_health_data.csv)]
+    MCPServer -->|predict_health_risk| CSV
+    MCPServer -->|generate_health_recommendations| CSV
 ```
+
+---
+
+## Open Questions
+
+> [!NOTE]
+> There are no unresolved open questions. We will use a rule-based logic for risk classification (cases increase >25% -> High Risk, <=25% -> Medium Risk, stable/decreasing -> Low Risk) as specified.
 
 ---
 
 ## Proposed Changes
 
-We will scaffold the project inside `c:\Users\sc\Documents\Capstone_project\health-agent`.
+We will introduce the new features across the project structure:
 
-### 1. Project Initialization & Scaffolding
+### 1. Dataset & Analytics Tools
 
-We will initialize the project using the CLI tool:
-```bash
-agents-cli scaffold create health-agent --agent adk --prototype
-```
-This generates the boilerplate structure. We will modify/add the files below.
+#### [NEW] [community_health_data.csv](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/data/community_health_data.csv)
+A CSV containing realistic public health statistics with columns: `date`, `region`, `disease`, `cases`, `vaccination_rate`.
+It will contain 30–50 rows mapping dates over the last few months for:
+*   **Diseases**: Dengue, Influenza, Diabetes, Heat Stroke
+*   **Wards**: Ward 1, Ward 2, Ward 3, Ward 4
+
+#### [MODIFY] [mcp_server.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/mcp_server.py)
+Register the new tools on the FastMCP instance:
+*   `analyze_health_trends() -> str`: Reads the CSV, aggregates cases by disease and region, identifies highest-risk region/disease, and returns a summary.
+*   `predict_health_risk(disease: str, region: str) -> str`: Compares latest period cases to previous period cases. Returns High Risk (>25% increase), Medium Risk (<=25% increase), or Low Risk.
+*   `generate_health_recommendations(disease: str, risk_level: str) -> str`: Returns targeted action items (e.g., mosquito control, hydration advisories, vaccine campaigns).
 
 ---
 
-### 2. Code Implementation
-
-#### [NEW] [mcp_server.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/mcp_server.py)
-A Python MCP server implementing tools using `mcp.server.fastmcp`:
-*   `retrieve_disease_info(disease: str) -> str`: Factual database lookup (causes, symptoms, prevention, when to seek care) for Dengue, Influenza, Diabetes, Heat Stroke, etc.
-*   `verify_health_myth(claim: str) -> str`: Factual evaluation of common myths (e.g. antibiotics curing viruses).
-*   `get_vaccination_schedule(age_group: str) -> str`: Structured schedules for infants, children, and adults.
-*   `get_preventive_guidelines(topic: str) -> str`: Healthy habits and prevention guidelines.
+### 2. Multi-Agent & Routing Updates
 
 #### [MODIFY] [agent.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/agent.py)
-Contains definitions for the agents using ADK:
-*   `HealthCoordinatorAgent`: Root agent with sub-agents list. Evaluates user intent, routes queries, handles initial input validation, and appends a standard medical advice disclaimer.
-*   `HealthInfoAgent`: Sub-agent for explanations. Binds to MCP tool `retrieve_disease_info`.
-*   `MythVerificationAgent`: Sub-agent for myths. Binds to MCP tool `verify_health_myth`.
-*   `PreventiveCareAgent`: Sub-agent for vaccination & habit planning. Binds to MCP tools `get_vaccination_schedule` and `get_preventive_guidelines`.
+*   Define the `community_health_analytics_agent` with instructions to use the new tools (`analyze_health_trends`, `predict_health_risk`, `generate_health_recommendations`).
+*   Update the `health_coordinator_agent` instructions to route requests like "Analyze community health data", "Show disease trends", "Predict dengue risk" to `community_health_analytics_agent`.
+*   Include the new agent in the `sub_agents` list of the coordinator.
 
-#### [NEW] [security.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/security.py)
-Implements safety constraints and security compliance:
-*   `validate_user_input(text: str)`: Callback/helper that runs before processing. Rejects scripts, injection attempts, or inappropriate text.
-*   `PIIMaskingPlugin`: A custom ADK plugin (`BasePlugin`) that overrides `before_model_callback` and `on_event_callback` to mask emails, phone numbers, and potential PII in logs/prompts using Regex.
-*   `InMemorySessionService` configuration to guarantee no user health info is stored on disk permanently.
+---
 
-#### [NEW] [web_server.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/web_server.py)
-FastAPI backend that:
-*   Sets up the ADK `Runner` and `SessionService`.
-*   Exposes a WebSocket endpoint `/chat` or POST endpoint `/query` that runs the agent and yields events (including tool calls, agent transfers, thinking processes, and logs).
-*   Serves the static web files for the dashboard.
+### 3. Backend API & Dashboard UI
 
-#### [NEW] [static/index.html](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/static/index.html)
-The dashboard HTML interface featuring:
-*   A chat area for entering questions and viewing conversation.
-*   A visual workspace mapping the agent network (`Coordinator` -> `HealthInfo`, `MythVerification`, `PreventiveCare`).
-*   A live reasoning panel displaying tool execution steps, LLM thought processes, and PII masking logs.
+#### [MODIFY] [web_server.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/web_server.py)
+*   Add a `GET /api/analytics` endpoint that parses the CSV and computes:
+    *   `total_cases`: Total cases across all periods.
+    *   `highest_risk_region`: Region with the highest aggregate cases.
+    *   `average_vaccination_rate`: Average of the `vaccination_rate` column.
+    *   `risk_level`: Computed system risk level.
+    *   `recommendations`: List of active recommendations.
+    *   `trend_data`: Monthly aggregates for Chart.js charting.
 
-#### [NEW] [static/style.css](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/static/style.css)
-A highly premium CSS design:
-*   Modern dark mode layout with custom fonts (Google Fonts: Outfits & Inter).
-*   Glassmorphism card designs with subtle shadows.
-*   Pulsing active states for agents and glowing animation effects during execution.
-*   Fully responsive grid layout.
+#### [MODIFY] [index.html](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/static/index.html)
+*   Include Chart.js library via CDN script tag.
+*   Add an "Analytics & Trends Dashboard" section with panels displaying KPIs (Total Cases, Highest Risk Region, Average Vaccination Rate, Current Risk Level) and a canvas for the trend line chart.
 
-#### [NEW] [static/app.js](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/static/app.js)
-Frontend logic to:
-*   Handle WebSockets/SSE streaming.
-*   Parse events to dynamically highlight active agents, render reasoning timelines, and update chat logs.
+#### [MODIFY] [style.css](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/static/style.css)
+*   Add layout styles for the Analytics dashboard grid, metrics cards, and Chart.js container, maintaining glassmorphism and the dark theme.
 
-#### [NEW] [run_app.py](file:///c:/Users/sc/Documents/Capstone_project/health-agent/run_app.py)
-A convenient python script to start the backend server and open the web dashboard:
-```python
-import uvicorn
-if __name__ == "__main__":
-    uvicorn.run("app.web_server:app", host="127.0.0.1", port=8000, reload=True)
-```
+#### [MODIFY] [app.js](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/static/app.js)
+*   Add logic to fetch data from `/api/analytics` on load.
+*   Render the KPI cards dynamically.
+*   Initialize and update the Chart.js line chart showing case counts over time grouped by disease/region.
+
+---
+
+### 4. Documentation & Dependencies
+
+#### [MODIFY] [pyproject.toml](file:///c:/Users/sc/Documents/Capstone_project/health-agent/pyproject.toml)
+*   Add `pandas` to the dependencies block.
+
+#### [MODIFY] [README.md](file:///c:/Users/sc/Documents/Capstone_project/health-agent/README.md)
+*   Add a **Decision Intelligence Extension** section explaining trend analysis, risk prediction, and recommendation engines.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-1. **Linting and Typing**:
-   Run `agents-cli lint` to check for syntax and type issues.
-2. **Behavioral Evaluation**:
-   Create a test dataset `tests/eval/datasets/health_eval.json` with the requested queries.
-   Configure evaluation metrics (relevance, accuracy, disclaimer presence) in `tests/eval/eval_config.yaml`.
+1. **Unit Tests**:
+   Update `tests/unit/test_health_agent.py` to verify:
+   *   Analytics tool executions (`analyze_health_trends`, `predict_health_risk`).
+   *   Importing the new agent and routing configuration in `agent.py`.
    Run:
    ```bash
-   agents-cli eval run
+   uv run pytest tests/unit/test_health_agent.py
    ```
 
 ### Manual Verification
-1. Run `python run_app.py` and open `http://127.0.0.1:8000`.
-2. Test the following scenarios:
-   *   **Symptoms Check**: "What are the symptoms of dengue fever?" -> Verify Health Information Agent is activated, tool-call is run, and symptoms are displayed.
-   *   **Myth Busting**: "Is it true that antibiotics cure viral infections?" -> Verify Myth Verification Agent is activated.
-   *   **Habit/Prevention**: "How can I prevent heat stroke during summer?" -> Verify Preventive Care Agent handles it.
-   *   **Security (PII)**: "My name is John Doe, email john@example.com. What vaccinations are recommended for kids?" -> Verify the final logs mask the email/name, and that personal data isn't persisted.
-   *   **Input Injection Check**: Input a script or injection prompt and verify the coordinator rejects it safely.
+1. Run `uv run python run_app.py` and open the browser.
+2. Confirm the analytics panel loads with dynamic statistics and a rendering Chart.js line chart.
+3. In chat, test:
+   *   "Analyze community health data for Ward 1" -> Verify routing to `community_health_analytics_agent` and correct tools execution.
+   *   "What is the risk of Influenza in Ward 2?" -> Verify risk level prediction returns (Low/Medium/High) along with recommendations.

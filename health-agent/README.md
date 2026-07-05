@@ -1,10 +1,10 @@
-# HealthGuard - Public Health Awareness Agent System
+# HealthInsight AI – Public Health Awareness Agent
 
-HealthGuard is a trusted public health assistant built using **Google's Agent Development Kit (ADK)**. It simplifies medical terminology, identifies and debunks health myths, provides vaccination schedules, and suggests healthy habits.
+HealthInsight AI is a trusted public health assistant built using **Google's Agent Development Kit (ADK)**. It simplifies medical terminology, identifies and debunks health myths, provides vaccination schedules, and suggests healthy habits.
 
-HealthGuard is designed with **privacy-first security layers**, including input validation and automated PII masking, and features a clean, responsive single-page web application.
+HealthInsight AI is designed with **privacy-first security layers**, including input validation and automated PII masking, and features a clean, responsive single-page web application.
 
-![HealthGuard UI Mockup](health_guard_dashboard.png)
+![HealthInsight AI UI Mockup](health_insight_dashboard.png)
 
 ---
 
@@ -28,7 +28,7 @@ HealthGuard is designed with **privacy-first security layers**, including input 
 
 *Detailed technical documentation is available in [architecture.md](architecture.md).*
 
-HealthGuard is structured around a coordinator-delegator pattern:
+HealthInsight AI is structured around a coordinator-delegator pattern:
 
 ```mermaid
 graph TD
@@ -52,7 +52,7 @@ graph TD
     MCPServer -->|get_preventive_guidelines| GuidelinesDB[(Guidelines)]
 ```
 
-![HealthGuard System Architecture](health_guard_architecture.png)
+![HealthInsight AI System Architecture](health_insight_architecture.png)
 
 
 ### Agents Role Definitions
@@ -60,6 +60,16 @@ graph TD
 2.  **Health Information Agent**: Explains symptoms, causes, and when to seek medical help. Binds to `retrieve_disease_info`.
 3.  **Myth Verification Agent**: Compares claims against clinical databases and details scientific consensus. Binds to `verify_health_myth`.
 4.  **Preventive Care Agent**: Provides child and adult vaccination schedules and healthy living guidelines. Binds to `get_vaccination_schedule` and `get_preventive_guidelines`.
+5.  **Community Health Analytics Agent**: Analyzes community health datasets, detects disease trends, calculates regional risk profiles, and provides data-driven public health recommendations. Binds to `analyze_health_trends`, `predict_health_risk`, and `generate_health_recommendations`.
+
+---
+
+## 🧠 Decision Intelligence Extension
+
+HealthInsight AI has been extended with a Public Health Decision Intelligence framework:
+*   **Grounded Data Processing**: Computes metrics from [community_health_data.csv](file:///c:/Users/sc/Documents/Capstone_project/health-agent/app/data/community_health_data.csv) containing realistic reports across Wards 1-4 for Dengue, Influenza, Diabetes, and Heat Stroke.
+*   **Trend & Risk Engine**: Uses lightweight Pandas rule-based analytics to identify case escalations and classify risk levels (High Risk for MoM increase >25%, Medium for <=25%, Low for stable or decreasing).
+*   **Dynamic Visual Dashboard**: Displays active KPI indicators and renders a multi-line Chart.js chart tracking cases over time and disease trends by region.
 
 ---
 

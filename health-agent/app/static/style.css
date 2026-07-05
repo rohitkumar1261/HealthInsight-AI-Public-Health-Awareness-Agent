@@ -1,4 +1,4 @@
-/* Tailored HSL color variables and styling for HealthGuard */
+/* Tailored HSL color variables and styling for HealthInsight AI */
 :root {
     --bg-dark: hsl(224, 25%, 10%);
     --panel-bg: hsla(224, 22%, 15%, 0.85);
@@ -12,6 +12,7 @@
     --color-info: hsl(210, 95%, 55%);            /* Royal Blue */
     --color-myth: hsl(282, 85%, 65%);            /* Glowing Purple */
     --color-preventive: hsl(150, 80%, 45%);      /* Mint Green */
+    --color-analytics: hsl(36, 100%, 55%);       /* Orange/Amber */
     --color-danger: hsl(355, 85%, 60%);          /* Warning Red */
     
     --shadow-premium: 0 12px 40px -10px rgba(0, 0, 0, 0.5);
@@ -162,6 +163,14 @@ body {
 }
 #node-preventive_care_agent.active {
     background: hsla(150, 80%, 45%, 0.1);
+}
+
+#node-community_health_analytics_agent.active .dot {
+    background: var(--color-analytics);
+    box-shadow: 0 0 8px var(--color-analytics);
+}
+#node-community_health_analytics_agent.active {
+    background: hsla(36, 100%, 55%, 0.1);
 }
 
 /* Header Action buttons */
@@ -480,4 +489,168 @@ body {
 
 .alert-close:hover {
     color: var(--text-primary);
+}
+
+.subagent-analytics .agent-label { color: var(--color-analytics); }
+
+.chat-message.subagent-analytics {
+    align-self: flex-start;
+    background: hsla(36, 100%, 55%, 0.06);
+    border: 1px solid hsla(36, 100%, 55%, 0.18);
+    border-bottom-left-radius: 2px;
+}
+
+/* Analytics Panel layout */
+.analytics-panel {
+    flex-grow: 1;
+    height: 100%;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: hsla(224, 25%, 8%, 0.15);
+}
+
+.panel-header h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.panel-icon {
+    font-size: 1.2rem;
+}
+
+.analytics-content {
+    flex-grow: 1;
+    padding: 16px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* KPI Card Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.kpi-card {
+    background: hsla(224, 22%, 12%, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpi-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.kpi-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-primary);
+}
+
+#kpi-risk-level {
+    transition: var(--transition-smooth);
+}
+
+.risk-high {
+    color: var(--color-danger) !important;
+}
+
+.risk-medium {
+    color: var(--color-analytics) !important;
+}
+
+.risk-low {
+    color: var(--color-preventive) !important;
+}
+
+/* Chart */
+.chart-container {
+    background: hsla(224, 22%, 12%, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 8px;
+    position: relative;
+    width: 100%;
+    min-height: 220px;
+    max-height: 280px;
+}
+
+/* Recommendations */
+.recs-section {
+    background: hsla(224, 22%, 12%, 0.4);
+    border: 1px solid var(--border-color);
+    padding: 14px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recs-section h4 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#recs-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#recs-list li {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    position: relative;
+    padding-left: 14px;
+    line-height: 1.4;
+}
+
+#recs-list li::before {
+    content: "•";
+    color: var(--color-analytics);
+    position: absolute;
+    left: 2px;
+    font-weight: bold;
+}
+
+/* Responsive side-by-side grid */
+@media (min-width: 1024px) {
+    .workspace-grid {
+        flex-direction: row !important;
+        gap: 16px;
+    }
+    
+    .chat-panel {
+        flex: 1 1 50%;
+        max-width: 50%;
+    }
+    
+    .analytics-panel {
+        flex: 1 1 50%;
+        max-width: 50%;
+        display: flex !important;
+    }
 }

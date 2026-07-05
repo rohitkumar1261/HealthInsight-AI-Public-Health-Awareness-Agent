@@ -82,7 +82,8 @@ function highlightAgent(agentName) {
         "health_coordinator_agent": "node-health_coordinator_agent",
         "health_info_agent": "node-health_info_agent",
         "myth_verification_agent": "node-myth_verification_agent",
-        "preventive_care_agent": "node-preventive_care_agent"
+        "preventive_care_agent": "node-preventive_care_agent",
+        "community_health_analytics_agent": "node-community_health_analytics_agent"
     };
     
     const elementId = nodeMap[agentName];
@@ -193,6 +194,9 @@ function startAssistantMessage(author) {
     } else if (author === "preventive_care_agent") {
         authorClass = "subagent-preventive";
         displayName = "Preventive Care Specialist";
+    } else if (author === "community_health_analytics_agent") {
+        authorClass = "subagent-analytics";
+        displayName = "Health Analyst";
     }
     
     const message = document.createElement("div");
@@ -238,6 +242,9 @@ function appendChatMessage(author, text) {
     } else if (author === "preventive_care_agent") {
         authorClass = "subagent-preventive";
         displayName = "Preventive Care Specialist";
+    } else if (author === "community_health_analytics_agent") {
+        authorClass = "subagent-analytics";
+        displayName = "Health Analyst";
     }
     
     message.className = `chat-message ${authorClass}`;
@@ -395,6 +402,115 @@ chatForm.addEventListener("submit", (e) => {
                 "Response Complete",
                 "Agent execution finished successfully."
             );
+            loadAnalyticsDashboard();
         }
     };
+});
+
+// Global Chart instance reference
+let analyticsChart = null;
+
+// Function to fetch metrics and load/render the Chart.js visual trend data
+async function loadAnalyticsDashboard() {
+    try {
+        const response = await fetch('/api/analytics');
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error("Error loading analytics:", data.error);
+            return;
+        }
+        
+        // Update KPI values
+        document.getElementById("kpi-total-cases").textContent = data.total_cases;
+        document.getElementById("kpi-highest-region").textContent = data.highest_risk_region;
+        document.getElementById("kpi-avg-vac").textContent = (data.average_vaccination_rate * 100).toFixed(1) + "%";
+        
+        const riskLevelEl = document.getElementById("kpi-risk-level");
+        riskLevelEl.textContent = data.risk_level;
+        riskLevelEl.className = "kpi-value"; // reset
+        if (data.risk_level.toLowerCase().includes("high")) {
+            riskLevelEl.classList.add("risk-high");
+        } else if (data.risk_level.toLowerCase().includes("medium")) {
+            riskLevelEl.classList.add("risk-medium");
+        } else {
+            riskLevelEl.classList.add("risk-low");
+        }
+        
+        // Update Recommendations list
+        const recsList = document.getElementById("recs-list");
+        recsList.innerHTML = "";
+        data.recommendations.forEach(rec => {
+            const li = document.createElement("li");
+            li.textContent = rec;
+            recsList.appendChild(li);
+        });
+        
+        // Render Chart.js line chart
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        if (analyticsChart) {
+            analyticsChart.destroy();
+        }
+        
+        // Assign distinct color palette matching existing HSL colors
+        const colors = {
+            "Dengue": "hsl(196, 95%, 50%)",      // Coordinator / Cyan
+            "Influenza": "hsl(210, 95%, 55%)",   // Info / Blue
+            "Diabetes": "hsl(282, 85%, 65%)",    // Myth / Purple
+            "Heat Stroke": "hsl(355, 85%, 60%)"  // Danger / Red
+        };
+        
+        const datasets = data.trend_data.datasets.map(ds => {
+            const color = colors[ds.label] || "hsl(36, 100%, 55%)";
+            return {
+                label: ds.label,
+                data: ds.data,
+                borderColor: color,
+                backgroundColor: color.replace(")", ", 0.15)"),
+                borderWidth: 2,
+                pointBackgroundColor: color,
+                pointRadius: 4,
+                tension: 0.3,
+                fill: false
+            };
+        });
+        
+        analyticsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.trend_data.labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#f5f5f5',
+                            font: { family: 'Outfit', size: 10 }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                        ticks: { color: '#b2b2b2', font: { family: 'Inter', size: 9 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                        ticks: { color: '#b2b2b2', font: { family: 'Inter', size: 9 } }
+                    }
+                }
+            }
+        });
+        
+    } catch (e) {
+        console.error("Failed to load analytics dashboard data", e);
+    }
+}
+
+// Initial load
+document.addEventListener("DOMContentLoaded", () => {
+    loadAnalyticsDashboard();
 });
